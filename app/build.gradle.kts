@@ -1,9 +1,9 @@
 import java.util.Properties
-import kotlin.apply
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlinxSerialization)
     id("kotlin-parcelize")
 }
 
@@ -52,9 +52,16 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.0"
+    }
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes +="META-INF/INDEX.LIST"
+        }
     }
 }
 
@@ -67,7 +74,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.okhttp)
     implementation(libs.androidx.navigation.fragment)
     implementation(libs.androidx.navigation.ui)
     implementation(libs.androidx.navigation.fragment.ktx)
@@ -87,13 +93,9 @@ dependencies {
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.androidx.compose.navigation)
     implementation(libs.koin.compose.viewmodel)
-    implementation(libs.retrofit)
-    implementation(libs.converter.moshi)
-    implementation(libs.logging.interceptor)
     implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.moshi.kotlin)
-    implementation(libs.kotlin.reflect)
     implementation(libs.coil.compose)
+    implementation(libs.bundles.ktor)
     //endregion
     //region Tests Dependencies
     testImplementation(libs.junit)

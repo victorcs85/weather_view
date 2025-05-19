@@ -20,7 +20,7 @@ class WeatherViewApplication : Application() {
             androidLogger()
             androidContext(this@WeatherViewApplication)
             modules(
-                AppModules().init(),
+                AppModules().init()
             )
         }
 

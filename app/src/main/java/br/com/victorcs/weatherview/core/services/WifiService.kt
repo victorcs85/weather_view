@@ -1,8 +1,9 @@
-package br.com.victorcs.weatherview.core
+package br.com.victorcs.weatherview.core.services
 
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import br.com.victorcs.weatherview.core.extensions.orFalse
 
 class WifiService(context: Context) {
 

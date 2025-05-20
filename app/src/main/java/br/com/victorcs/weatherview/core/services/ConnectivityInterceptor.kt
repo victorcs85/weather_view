@@ -1,4 +1,4 @@
-package br.com.victorcs.weatherview.core
+package br.com.victorcs.weatherview.core.services
 
 import br.com.victorcs.weatherview.data.source.remote.WithoutNetworkException
 import okhttp3.Interceptor

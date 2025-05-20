@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">WeatherView</string>
+    <string name="challenge">Desafio</string>
+    <string name="button_label">Exemplo concorrência - Clima em São Paulo e Amazonas</string>
+    <string name="cd_loading">Carregando os dados</string>
+    <string name="cd_back_button">Botão voltar superior</string>
 </resources>

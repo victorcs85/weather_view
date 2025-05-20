@@ -7,7 +7,8 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 
-private const val WEATHER_API_URL = "https://api.openweathermap.org/data/3.0/"
+private const val WEATHER_API_URL = "https://api.openweathermap.org/data/2.5/"
+private const val WEATHER_ENDPOINT = "weather"
 private const val LAT = "lat"
 private const val LON = "lon"
 private const val APP_ID = "appid"
@@ -20,7 +21,7 @@ class WeatherRemoteDataSource(
         lat: Double,
         lon: Double,
     ): WeatherResponse {
-        return client.get(WEATHER_API_URL) {
+        return client.get(WEATHER_API_URL+WEATHER_ENDPOINT) {
             parameter(LAT, lat)
             parameter(LON, lon)
             parameter(APP_ID, BuildConfig.WEATHER_KEY)

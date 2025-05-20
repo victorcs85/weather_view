@@ -1,48 +1,77 @@
 package br.com.victorcs.weatherview.data.mapper
 
-import br.com.victorcs.weatherview.data.entity.CurrentWeatherResponse
-import br.com.victorcs.weatherview.data.entity.WeatherDescriptionResponse
+import br.com.victorcs.weatherview.data.entity.CloudsResponse
+import br.com.victorcs.weatherview.data.entity.CoordResponse
+import br.com.victorcs.weatherview.data.entity.MainResponse
+import br.com.victorcs.weatherview.data.entity.SysResponse
+import br.com.victorcs.weatherview.data.entity.WeatherInfoResponse
 import br.com.victorcs.weatherview.data.entity.WeatherResponse
+import br.com.victorcs.weatherview.data.entity.WindResponse
 import br.com.victorcs.weatherview.domain.mapper.DomainMapper
-import br.com.victorcs.weatherview.domain.model.CurrentWeather
+import br.com.victorcs.weatherview.domain.model.Clouds
+import br.com.victorcs.weatherview.domain.model.Coordinates
+import br.com.victorcs.weatherview.domain.model.Main
+import br.com.victorcs.weatherview.domain.model.SystemInfo
 import br.com.victorcs.weatherview.domain.model.Weather
-import br.com.victorcs.weatherview.domain.model.WeatherDescription
-import br.com.victorcs.weatherview.extensions.toCelsius
-import br.com.victorcs.weatherview.extensions.toFormattedDate
+import br.com.victorcs.weatherview.domain.model.WeatherInfo
+import br.com.victorcs.weatherview.domain.model.Wind
 
 class WeatherResponseMapper() : DomainMapper<WeatherResponse, Weather> {
     override fun toDomain(from: WeatherResponse) = Weather(
-        lat = from.lat,
-        lon = from.lon,
+        coordinates = from.coord.toDomain(),
+        weatherInfo = from.weather.map { it.toDomain() },
+        base = from.base,
+        main = from.main.toDomain(),
+        visibility = from.visibility,
+        wind = from.wind.toDomain(),
+        rainVolume = from.rain?.`1h`,
+        clouds = from.clouds.toDomain(),
+        timestamp = from.dt,
+        system = from.sys.toDomain(),
         timezone = from.timezone,
-        timezoneOffset = from.timezone_offset,
-        current = from.current.toCurrentWeather()
+        locationId = from.id,
+        locationName = from.name,
+        statusCode = from.cod
     )
 
-    private fun CurrentWeatherResponse.toCurrentWeather() = CurrentWeather(
-        dateTime = this.dt.toFormattedDate(),
-        sunrise = this.sunrise?.toFormattedDate(),
-        sunset = this.sunset?.toFormattedDate(),
-        tempCelsius = this.temp.toCelsius(),
-        feelsLikeCelsius = this.feels_like.toCelsius(),
-        pressure = this.pressure,
-        humidity = this.humidity,
-        dewPointCelsius = this.dew_point.toCelsius(),
-        uvi = this.uvi,
-        clouds = this.clouds,
-        visibility = this.visibility,
-        windSpeed = this.wind_speed,
-        windDeg = this.wind_deg,
-        windGust = this.wind_gust,
-        weather = this.weather.toWeatherDescription(),
+    private fun CoordResponse.toDomain() = Coordinates(
+        lon = lon,
+        lat = lat
     )
 
-    private fun List<WeatherDescriptionResponse>.toWeatherDescription()= this.map {
-        WeatherDescription(
-            id = it.id,
-            main = it.main,
-            description = it.description,
-            icon = it.icon
-        )
-    }
+    private fun WeatherInfoResponse.toDomain() = WeatherInfo(
+        id = id,
+        main = main,
+        description = description,
+        icon = icon
+    )
+
+    private fun MainResponse.toDomain() = Main(
+        temp = temp,
+        feelsLike = feels_like,
+        tempMin = temp_min,
+        tempMax = temp_max,
+        pressure = pressure,
+        humidity = humidity,
+        seaLevel = sea_level,
+        groundLevel = grnd_level
+    )
+
+    private fun WindResponse.toDomain() = Wind(
+        speed = speed,
+        degree = deg,
+        gust = gust
+    )
+
+    private fun CloudsResponse.toDomain() = Clouds(
+        coverage = all
+    )
+
+    private fun SysResponse.toDomain() = SystemInfo(
+        type = type ?: 0,
+        id = id ?: 0,
+        country = country,
+        sunrise = sunrise,
+        sunset = sunset
+    )
 }

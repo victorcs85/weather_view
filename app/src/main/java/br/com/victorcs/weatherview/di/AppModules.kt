@@ -1,7 +1,7 @@
 package br.com.victorcs.weatherview.di
 
-import br.com.victorcs.weatherview.core.ConnectivityInterceptor
-import br.com.victorcs.weatherview.core.WifiService
+import br.com.victorcs.weatherview.core.services.ConnectivityInterceptor
+import br.com.victorcs.weatherview.core.services.WifiService
 import br.com.victorcs.weatherview.data.entity.WeatherResponse
 import br.com.victorcs.weatherview.data.mapper.WeatherResponseMapper
 import br.com.victorcs.weatherview.data.source.remote.WeatherAPI
@@ -10,6 +10,7 @@ import br.com.victorcs.weatherview.data.source.remote.repository.WeatherReposito
 import br.com.victorcs.weatherview.domain.mapper.DomainMapper
 import br.com.victorcs.weatherview.domain.model.Weather
 import br.com.victorcs.weatherview.domain.repository.IWeatherRepository
+import br.com.victorcs.weatherview.presentation.features.weather.ui.WeatherViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -18,23 +19,29 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.Dispatchers
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 class AppModules : ModuleInitialization() {
 
     //region Data
+    @OptIn(ExperimentalSerializationApi::class)
     private val dataModule = module {
+        factory<WeatherAPI> { WeatherRemoteDataSource(client = get()) }
+
         single<IWeatherRepository> { WeatherRepositoryImpl(
             remoteDataSource = get(),
             mapper = get()
         ) }
 
-        single<DomainMapper<WeatherResponse, Weather>> { WeatherResponseMapper() }
+        single { Dispatchers.IO }
 
-        factory<WeatherAPI> { WeatherRemoteDataSource(client = get()) }
+        single<DomainMapper<WeatherResponse, Weather>> { WeatherResponseMapper() }
 
         single {
             HttpClient(Android) {
@@ -44,6 +51,7 @@ class AppModules : ModuleInitialization() {
                             prettyPrint = true
                             isLenient = true
                             ignoreUnknownKeys = true
+                            explicitNulls = false
                         }
                     )
                 }
@@ -59,25 +67,24 @@ class AppModules : ModuleInitialization() {
 
     //region Core
     private val coreModule = module {
-        single { WifiService(androidContext()) }
-        single { ConnectivityInterceptor(get()) }
-    }
-    //endregion
-
-    //region Domain
-    private val domainModule = module {
+        single { WifiService(context = androidContext()) }
+        single { ConnectivityInterceptor(wifiService = get()) }
     }
     //endregion
 
     //region Presentation
     private val presentationModule = module {
+        viewModel {
+            WeatherViewModel(
+                repository = get()
+            )
+        }
     }
     //endregion
 
     override fun init(): List<Module> = listOf(
         coreModule,
         dataModule,
-        domainModule,
         presentationModule
     )
 }

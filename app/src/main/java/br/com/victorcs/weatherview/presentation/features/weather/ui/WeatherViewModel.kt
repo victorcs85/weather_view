@@ -3,7 +3,6 @@ package br.com.victorcs.weatherview.presentation.features.weather.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.victorcs.weatherview.GENERIC_MESSAGE_ERROR
-import br.com.victorcs.weatherview.core.IDispatchersProvider
 import br.com.victorcs.weatherview.domain.model.Response
 import br.com.victorcs.weatherview.domain.model.Weather
 import br.com.victorcs.weatherview.domain.repository.IWeatherRepository
@@ -18,26 +17,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-private val SaoPauloCoordinates = -23.5505 to -46.6333
-private val AmazonasCoordinates = -3.117034 to -60.025780
-
-//private enum class SaoPauloCoordinates(val value: Double) {
-//    LATITUDE(-23.5505),
-//    LONGITUDE(-46.6333)
-//}
-//private enum class AmazonasCoordinates(val value: Double) {
-//    LATITUDE(-3.117034),
-//    LONGITUDE(-60.025780)
-//}
-
-//private object AmazonasCoordinates {
-//    const val LATITUDE = -3.117034
-//    const val LONGITUDE = -60.025780
-//}
+private val saoPauloCoordinates = -23.5505 to -46.6333
+private val amazonasCoordinates = -3.117034 to -60.025780
+private const val SP_NAME = "São Paulo"
+private const val AM_NAME = "Amazonas"
 
 class WeatherViewModel(
     private val repository: IWeatherRepository,
-    private val dispatchers: IDispatchersProvider,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(WeatherState())
@@ -50,20 +36,19 @@ class WeatherViewModel(
     }
 
     private fun fetchConcurrently() {
-        viewModelScope.launch(dispatchers.io) {
+        viewModelScope.launch {
             runCatching {
                 _state.value = WeatherState(isLoading = true)
 
                 val cities = listOf(
-                    SaoPauloCoordinates,
-                    AmazonasCoordinates
+                    SP_NAME to saoPauloCoordinates,
+                    AM_NAME to amazonasCoordinates
                 )
 
                 val results = coroutineScope {
-
-                    cities.map { coordinates ->
+                    cities.map { (cityName, coordinates) ->
                         async {
-                            repository.getWeatherData(
+                            cityName to repository.getWeatherData(
                                 coordinates.first,
                                 coordinates.second
                             )
@@ -71,19 +56,26 @@ class WeatherViewModel(
                     }.awaitAll()
                 }
 
-                if (results.all { it is Response.Success }) {
+                val successResults = results.filter { it.second is Response.Success }
+                val errorResult = results.firstOrNull { it.second is Response.Error }
+
+                if (successResults.size == cities.size) {
+                    val weatherMap = successResults.associate { (cityName, response) ->
+                        cityName to (response as Response.Success<Weather>).data
+                    }
+
                     _state.value = WeatherState(
-                        weathers =
-                            results.map { (it as Response.Success<Weather>).data }
+                        weathers = weatherMap
                     )
                     return@launch
                 }
 
-                if (results.any { it is Response.Error }) {
+                if (errorResult != null) {
+                    val errorMessage = (errorResult.second as Response.Error).errorMessage
+                    Timber.e(errorMessage)
                     _state.value = WeatherState(
-                        error = (results.first { it is Response.Error } as Response.Error).errorMessage
+                        error = errorMessage
                     )
-                    return@launch
                 }
 
             }.onFailure { error ->

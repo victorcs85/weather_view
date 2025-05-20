@@ -35,6 +35,7 @@ android {
             "BANNER_ID",
             "\"${localProperties["BANNER_ID"]}\""
         )
+        resValue("string", "ad_id", "${localProperties["AD_ID"]}")
     }
 
     buildTypes {

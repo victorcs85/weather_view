@@ -40,5 +40,5 @@ Using AdMob SDK to show ads in the app to test your implementations.
 - Open the project in Android Studio.
 - Make sure you have the Android SDK installed.
 - Run the project on an emulator or Android device.
-- Make sure you have a valid OpenWeatherMap API key and add it to the `gradle.properties` file as `WEATHER_KEY`.
-- Make sure you have a valid AdMob banner key and add it to the `gradle.properties` file as `BANNER_ID`.
+- Make sure you have a valid OpenWeatherMap API key and add it to the `local.properties` file as `WEATHER_KEY`.
+- Make sure you have a valid AdMob banner key and add it to the `local.properties` file as `AD_ID` and `BANNER_ID`.

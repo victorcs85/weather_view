@@ -1,5 +1,7 @@
 package br.com.victorcs.weatherview.di
 
+import br.com.victorcs.weatherview.core.IDispatchersProvider
+import br.com.victorcs.weatherview.core.IDispatchersProviderImpl
 import br.com.victorcs.weatherview.core.services.ConnectivityInterceptor
 import br.com.victorcs.weatherview.core.services.WifiService
 import br.com.victorcs.weatherview.data.entity.WeatherResponse
@@ -69,6 +71,7 @@ class AppModules : ModuleInitialization() {
     private val coreModule = module {
         single { WifiService(context = androidContext()) }
         single { ConnectivityInterceptor(wifiService = get()) }
+        single<IDispatchersProvider> { IDispatchersProviderImpl() }
     }
     //endregion
 
@@ -76,7 +79,8 @@ class AppModules : ModuleInitialization() {
     private val presentationModule = module {
         viewModel {
             WeatherViewModel(
-                repository = get()
+                repository = get(),
+                dispatchers = get(),
             )
         }
     }

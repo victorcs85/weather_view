@@ -3,11 +3,13 @@ package br.com.victorcs.weatherview.presentation.features.weather.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.victorcs.weatherview.GENERIC_MESSAGE_ERROR
+import br.com.victorcs.weatherview.core.IDispatchersProvider
 import br.com.victorcs.weatherview.domain.model.Response
 import br.com.victorcs.weatherview.domain.model.Weather
 import br.com.victorcs.weatherview.domain.repository.IWeatherRepository
 import br.com.victorcs.weatherview.presentation.features.weather.intent.WeatherIntent
 import br.com.victorcs.weatherview.presentation.features.weather.state.WeatherState
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -15,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
 import timber.log.Timber
 
 private val saoPauloCoordinates = -23.5505 to -46.6333
@@ -24,7 +27,8 @@ private const val AM_NAME = "Amazonas"
 
 class WeatherViewModel(
     private val repository: IWeatherRepository,
-) : ViewModel() {
+    private val dispatchers: IDispatchersProvider
+) : ViewModel(), KoinComponent {
 
     private val _state = MutableStateFlow(WeatherState())
     val state: StateFlow<WeatherState> = _state.asStateFlow()
@@ -36,7 +40,8 @@ class WeatherViewModel(
     }
 
     private fun fetchConcurrently() {
-        viewModelScope.launch {
+        val coroutineDispatcher: CoroutineDispatcher = dispatchers.io
+        viewModelScope.launch(coroutineDispatcher) {
             runCatching {
                 _state.value = WeatherState(isLoading = true)
 

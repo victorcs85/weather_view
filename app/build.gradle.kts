@@ -30,6 +30,11 @@ android {
             "WEATHER_KEY",
             "\"${localProperties["WEATHER_KEY"]}\""
         )
+        buildConfigField(
+            "String",
+            "BANNER_ID",
+            "\"${localProperties["BANNER_ID"]}\""
+        )
     }
 
     buildTypes {
@@ -97,6 +102,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.coil.compose)
     implementation(libs.bundles.ktor)
+    implementation(libs.play.services.ads)
     //endregion
     //region Tests Dependencies
     testImplementation(libs.junit)

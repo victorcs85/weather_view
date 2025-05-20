@@ -4,4 +4,6 @@
     <string name="button_label">Exemplo concorrência - Clima em São Paulo e Amazonas</string>
     <string name="cd_loading">Carregando os dados</string>
     <string name="cd_back_button">Botão voltar superior</string>
+
+    <string name="ad_id">ca-app-pub-3940256099942544~3347511713</string>
 </resources>
